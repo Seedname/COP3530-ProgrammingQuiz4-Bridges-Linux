@@ -48,7 +48,6 @@ namespace bridges {
 		 * 	@date 6/11/15, 11/27/16, 7/12/19, 12/28/20
 		 */
 
-
 		template <typename E> class Element {
 				//Used for access to generateJSON() and for links manipulation
 				template <typename K, typename E1, typename E2> friend class GraphAdjList;
@@ -66,9 +65,9 @@ namespace bridges {
 				 * List of shapes supported by BRIDGES : CIRCLE, SQUARE, DIAMOND,
 				 *	CROSS, TRIANGLE, WYE, STAR
 				 */
-				static const unordered_map<const Shape, const string, hash<int>>& ShapeNames() {
+				static const unordered_map<const Shape, const string, hash<int >> & ShapeNames() {
 
-					static std::unordered_map<const Shape, const string, hash<int>> sn = {
+					static std::unordered_map<const Shape, const string, hash<int >> sn = {
 						{CIRCLE, "circle"},
 						{SQUARE, "square"},
 						{DIAMOND, "diamond"},
@@ -79,8 +78,6 @@ namespace bridges {
 					};
 					return sn;
 				}
-
-
 
 				//this element's label
 				string label;
@@ -163,7 +160,7 @@ namespace bridges {
 				 * @return The LinkVisualizer
 				 */
 				LinkVisualizer* getLinkVisualizer(const Element* el) {
-					if (links.find(const_cast<Element*>(el)) != links.end()) {
+					if (links.find(const_cast<Element * >(el)) != links.end()) {
 						return &(links.at(const_cast<Element*>(el)));
 					}
 					if (debug())
@@ -260,6 +257,46 @@ namespace bridges {
 						QUOTE + "name" + QUOTE + COLON + JSONencode( label) +
 						CLOSE_CURLY;
 				}
+				/*
+								virtual void getElementRepresentation(rapidjson::Document& d)
+																		const {
+									using namespace rapidjson;
+									//write out ElementVisualizer properties
+
+									Value k, v;
+									d.SetObject();
+									Document::AllocatorType& allocator = d.GetAllocator();
+
+									Value el_obj(kObjectType);
+
+									// first check if location is set and needs to be included
+									if ( (elvis->getLocationX() != INFINITY) &&
+										(elvis->getLocationY() != INFINITY) ) {
+
+										Value loc_arr(kArrayType);
+										loc_arr.PushBack(v.SetDouble(elvis->getLocationX()),
+																allocator);
+										loc_arr.PushBack(v.SetDouble(elvis->getLocationY()),
+																allocator);
+										el_obj.AddMember("location", loc_arr, allocator);
+									}
+
+								//	string col_rep = elvis->getColor().getCSSRepresentation();
+								//	v.SetString(col_rep.c_str(), allocator);
+									Document d2;
+									elvis->getColor().getCSSRepresentation(d2);
+									el_obj.AddMember("color", d2["color"], allocator);
+									string s = ShapeNames().at(elvis->getShape());
+									v.SetString(s.c_str(), allocator);
+									el_obj.AddMember("shape", v, allocator);
+									el_obj.AddMember("size", v.SetDouble(elvis->getSize()), allocator);
+									v.SetString(label.c_str(), allocator);
+									el_obj.AddMember("name", v, allocator);
+
+									// put this into an element
+									d.AddMember ("element", el_obj, allocator);
+								}
+				*/
 				/**
 				 * Gets the JSON representation of this link visualizer using
 				 * the supplied source and destination strings
@@ -270,23 +307,48 @@ namespace bridges {
 				 * @return The JSON of this link visualizer
 				 *
 				 */
-				static const string getLinkRepresentation(const LinkVisualizer& lv,
+				static const string getLinkRepresentation(
+					const LinkVisualizer& lv,
 					const string& src, const string& dest) {
 					using bridges::JSONUtil::JSONencode;
-
 
 					//write out LinkVisualizer properties
 					return OPEN_CURLY +
 						QUOTE + "color"     + QUOTE + COLON + lv.getColor().getCSSRepresentation()
 						+ COMMA +
 						(!lv.getLabel().empty() ?
-							(QUOTE + "label" + QUOTE + COLON +
-								JSONencode( lv.getLabel()) + COMMA) : "") +
+						(QUOTE + "label" + QUOTE + COLON +
+							JSONencode( lv.getLabel()) + COMMA) : "") +
 						QUOTE + "thickness" + QUOTE + COLON +
 						JSONencode(lv.getThickness()) + COMMA +
 						QUOTE + "source"    + QUOTE + COLON + JSONencode(src)  + COMMA +
 						QUOTE + "target"    + QUOTE + COLON + JSONencode(dest) +
 						CLOSE_CURLY;
+				}
+				static void getLinkRepresentation(
+					const LinkVisualizer& lv,
+					const string& src, const string& dest,
+					rapidjson::Document& d) {
+
+					using namespace rapidjson;
+					Document::AllocatorType& allocator = d.GetAllocator();
+					d.SetObject();
+					Value lv_obj, v, v2;
+					lv_obj.SetObject();
+
+					string col_str = lv.getColor().getCSSRepresentation();
+					v.SetString(col_str.c_str(), allocator);
+					lv_obj.AddMember("color", v, allocator);
+					if (!lv.getLabel().empty()) {
+						v.SetString(lv.getLabel().c_str(), allocator);
+						lv_obj.AddMember("label", v, allocator);
+					}
+					lv_obj.AddMember("thickness", v.SetDouble(lv.getThickness()), allocator);
+					v.SetString(src.c_str(), allocator);
+					lv_obj.AddMember("source", v, allocator);
+					v2.SetString(dest.c_str(), allocator);
+					lv_obj.AddMember("target", v2, allocator);
+					d.AddMember("link", lv_obj, allocator);
 				}
 			public:
 				/**

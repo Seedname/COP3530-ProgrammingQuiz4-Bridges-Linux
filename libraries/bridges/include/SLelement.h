@@ -4,7 +4,6 @@
 #include "DataStructure.h"
 #include "Element.h" //string, using std
 
-
 namespace bridges {
 	namespace datastructure {
 		/**
@@ -42,7 +41,7 @@ namespace bridges {
 				 * 	@param next The next SLelement
 				 */
 				SLelement(SLelement* next, const E& val = E(), const string& lab =
-						string()) : Element<E>(val, lab) {
+					string()) : Element<E>(val, lab) {
 					setNext(next);
 				}
 				/**
@@ -107,7 +106,6 @@ namespace bridges {
 				 * @return JSON string of the singly linked list representation
 				 */
 				virtual const string getDataStructureRepresentation() const override {
-
 					vector<const SLelement<E>*> nodes;
 					// get the list of nodes
 					getListElements(nodes);
@@ -129,9 +127,33 @@ namespace bridges {
 						json_nodes_links.second + CLOSE_BOX +
 						CLOSE_CURLY;
 
-
 					return sl_list_json;
 				}
+
+				/*
+								virtual void getDataStructureRepresentation(
+										rapidjson::Document& d) const override {
+									vector<const SLelement<E>*> nodes;
+									// get the list of nodes
+									getListElements(nodes);
+									// generate the JSON
+
+									if (MAX_ELEMENTS_ALLOWED <= nodes.size()) {
+										// cant exceed max number of elements
+										throw "Max allowed elements(for visualization) exceeded.."
+											 + to_string(nodes.size()) + " Must be less than " +
+											to_string(MAX_ELEMENTS_ALLOWED);
+									}
+									generateJSON(nodes, d);
+
+				assert (d.IsObject());
+				assert (d["links"].IsObject());
+				cout << "in slelement:getds..\n";
+				StringBuffer sb; Writer<StringBuffer> w(sb);
+				d.Accept(w); cout << "DS Rep(nodes, links):\n" << sb.GetString() << endl;;
+								}
+				*/
+
 			protected:
 				/**
 				 *  @brief Generates the JSON representation of the element
@@ -150,7 +172,7 @@ namespace bridges {
 					string nodes_JSON, links_JSON;
 
 					int i = 0; 		// get the JSON string for nodes
-					for (const auto* e : nodes) {
+					for (const auto * e : nodes) {
 						if (node_map.emplace(e, i).second)  {
 							// successful emplacement
 							i++;
@@ -166,8 +188,8 @@ namespace bridges {
 					for (unsigned int k = 0; k < nodes.size(); k++) {
 						if (nodes[k]->next != nullptr) { // link exists
 							links_JSON += this->getLinkRepresentation(nodes[k]->links.at(nodes[k]->next),
-									to_string(node_map[nodes[k]]),
-									to_string(node_map[nodes[k]->next]) ) + COMMA;
+								to_string(node_map[nodes[k]]),
+								to_string(node_map[nodes[k]->next]) ) + COMMA;
 						}
 					}
 
@@ -178,6 +200,57 @@ namespace bridges {
 
 					return pair<string, string> (nodes_JSON, links_JSON);
 				}
+				/*
+								virtual void generateJSON( vector<const SLelement<E>*> nodes,
+													rapidjson::Document& d) const {
+									// map the nodes to a sequence of ids, 0...N-1
+									// then get the JSON string for nodes placeholder
+									// nullptr prevents insertion of other nullptrs
+
+									using namespace rapidjson;
+									unordered_map<const SLelement*, int> node_map { {nullptr, -1} };
+
+									d.SetObject();
+									Document::AllocatorType& allocator = d.GetAllocator();
+									Value key, val;
+
+									Value node_arr(kArrayType);
+
+									int i = 0, k = 0; 		// get the JSON string for nodes
+									Document dn;
+									for (const auto* e : nodes) {
+										if (node_map.emplace(e, i).second)  {
+											// successful emplacement
+											i++;
+											e->getElementRepresentation(dn);
+				//cout << "printing dn[element]...\n";
+				//StringBuffer sb; Writer<StringBuffer> w(sb); dn["element"].Accept(w); cout << sb.GetString();
+											node_arr.PushBack(dn["element"], allocator);
+										}
+									}
+				//StringBuffer sb; Writer <StringBuffer> w(sb);
+				//node_arr.Accept(w); cout << "Element (in SLelement):" << sb.GetString() << "\n";
+									d.AddMember ("nodes", node_arr, allocator);
+				//assert(d["nodes"].IsArray());
+				//cout << "printing d[nodes]...\n";
+				//StringBuffer sb; Writer<StringBuffer> w(sb); d.Accept(w); cout << sb.GetString();
+
+									// for each pair<SLelement*,int> in map
+									Value link_arr(kArrayType);
+									Document dl;
+									for (unsigned int k = 0; k < nodes.size(); k++) {
+										if (nodes[k]->next != nullptr) { // link exists
+
+											this->getLinkRepresentation(
+												nodes[k]->links.at(nodes[k]->next),
+												to_string(node_map[nodes[k]]),
+												to_string(node_map[nodes[k]->next]), dl);
+											link_arr.PushBack(dl["link"], allocator);
+										}
+									}
+									d.AddMember ("links", link_arr, allocator);
+								}
+				*/
 			protected:
 				/**
 				 * 	@brief Get the list of nodes
@@ -257,7 +330,6 @@ namespace bridges {
 						}
 				};
 
-
 				/**
 				 *	@brief These are helper classes for SLelement for easy
 				 *	 iteration.
@@ -305,7 +377,6 @@ namespace bridges {
 							return iterator(nullptr);
 						}
 				};
-
 
 		}; //end of SLelement class
 		// use some aliases for accessing iterators

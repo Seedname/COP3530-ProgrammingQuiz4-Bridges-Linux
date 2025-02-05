@@ -49,19 +49,18 @@ namespace bridges {
 					return "GraphAdjacencyMatrix";
 				}
 
-		  virtual ~GraphAdjMatrix() {
-		    for (auto it : vertices)
-		      delete it.second;
-		  }
-		  GraphAdjMatrix() = default;
+				virtual ~GraphAdjMatrix() {
+					for (auto it : vertices)
+						delete it.second;
+				}
+				GraphAdjMatrix() = default;
 
-		  // The default version of these functions would be incorrect.
-		  // So marking them delete to avoid problems.
-		  // We could write them if necessary
-		  GraphAdjMatrix(const GraphAdjMatrix&) = delete;
-		  GraphAdjMatrix& operator=(const GraphAdjMatrix&) = delete;
+				// The default version of these functions would be incorrect.
+				// So marking them delete to avoid problems.
+				// We could write them if necessary
+				GraphAdjMatrix(const GraphAdjMatrix&) = delete;
+				GraphAdjMatrix& operator=(const GraphAdjMatrix&) = delete;
 
-		  
 				/**
 				 * Adds a vertex of key "k" and value "e" to the graph.
 				 * Sets all of its edges to be of weight 0.
@@ -104,7 +103,7 @@ namespace bridges {
 				 *  Return the adjacency matrix
 				 *	@return The matrix of this graphs edges
 				 */
-				const unordered_map<K, unordered_map<K, int>>& getMatrix() const {
+				const unordered_map<K, unordered_map<K, int >> & getMatrix() const {
 					return matrix;
 				}
 
@@ -176,7 +175,7 @@ namespace bridges {
 					}
 					catch ( const out_of_range& ) {
 						cerr << "setVertexData(): Nonexistent vertices or " <<
-							" edge not found" << endl;
+								" edge not found" << endl;
 						throw;
 					}
 					catch (const char* msg) {
@@ -199,7 +198,7 @@ namespace bridges {
 					}
 					catch ( const out_of_range& oor) {
 						cerr << "getEdgeData(): Nonexistent vertices or " <<
-							" edge not found" << endl;
+								" edge not found" << endl;
 						throw;
 					}
 					catch (const char* msg) {
@@ -224,7 +223,7 @@ namespace bridges {
 					}
 					catch ( const out_of_range& oor) {
 						cerr << "setEdgeData(): Nonexistent vertices or " <<
-							" edge not found" << endl;
+								" edge not found" << endl;
 						throw;
 					}
 					catch (const char* msg) {
@@ -334,6 +333,9 @@ namespace bridges {
 
 					return graph_amatrix_json;
 				}
+				//virtual void getDataStructureRepresentation(rapidjson::Document& d)
+				//const final {
+				//}
 		}; //end of GraphAdjList class
 	}
 }//end of bridges namespace

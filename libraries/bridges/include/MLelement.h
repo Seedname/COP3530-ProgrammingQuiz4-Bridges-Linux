@@ -42,7 +42,6 @@ namespace bridges {
 		 *
 		 */
 
-
 		template <typename E>
 		class MLelement : public SLelement<E> {
 
@@ -212,7 +211,7 @@ namespace bridges {
 					string nodes_JSON, links_JSON;
 
 					int i = 0; 		// get the JSON string for nodes
-					for (const auto* e : nodes) {
+					for (const auto * e : nodes) {
 						if (node_map.emplace(e, i).second)  {
 							// successful emplacement
 							i++;
@@ -229,8 +228,8 @@ namespace bridges {
 					for (int k = 0; k < nodes.size(); k++) {
 						if (nodes[k]->next != nullptr) { // link exists
 							links_JSON += this->getLinkRepresentation(nodes[k]->links.at(nodes[k]->next),
-									to_string(node_map[nodes[k]]),
-									to_string(node_map[nodes[k]->getNext()])) + COMMA;
+								to_string(node_map[nodes[k]]),
+								to_string(node_map[nodes[k]->getNext()])) + COMMA;
 						}
 						if (nodes[k]->tag) {	// sublist link
 
@@ -257,6 +256,9 @@ namespace bridges {
 
 					return ml_list_json;
 				}
+
+				//				virtual void getDataStructureRepresentation(rapidjson::Document& d) const override {
+				//				}
 				/**
 				 *  Get the list of nodes into a vector
 				 *

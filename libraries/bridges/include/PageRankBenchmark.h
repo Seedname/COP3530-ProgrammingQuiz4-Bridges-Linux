@@ -57,7 +57,7 @@ namespace bridges {
 				 **/
 				void run(std::string algoName,
 					void (*pralgo)(const GraphAdjList<std::string>& gr,
-						std::unordered_map<std::string, double>& out)) {
+					std::unordered_map<std::string, double>& out)) {
 					std::vector<double> time;
 					std::vector<double> vtxCounts;
 					std::vector<double> edgeCounts;
@@ -79,7 +79,6 @@ namespace bridges {
 						std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
 
 						std::chrono::duration<double> elapsed_seconds = end - start;
-
 
 						time.push_back ((double)elapsed_seconds.count() );
 						vtxCounts.push_back ( (double)vertexCount );

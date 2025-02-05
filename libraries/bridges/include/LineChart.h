@@ -52,8 +52,8 @@ namespace bridges {
 				bool logarithmicx;
 				bool logarithmicy;
 
-				unordered_map<string, vector<double>> xaxisData;
-				unordered_map<string, vector<double>> yaxisData;
+				unordered_map<string, vector<double >> xaxisData;
+				unordered_map<string, vector<double >> yaxisData;
 
 			public:
 				LineChart() {
@@ -157,7 +157,6 @@ namespace bridges {
 					return plotSubtitle;
 				}
 
-
 				/**
 				 * @brief Change the label for the Y-axis
 				 *
@@ -194,7 +193,6 @@ namespace bridges {
 					return xLabel;
 				}
 
-
 				/**
 				 * @brief Add a series (or update it)
 				 *
@@ -206,7 +204,6 @@ namespace bridges {
 					setXData(seriesName, xdata);
 					setYData(seriesName, ydata);
 				}
-
 
 				/**
 				 * @brief Changes the X data for a series
@@ -279,7 +276,7 @@ namespace bridges {
 								if (xdata[i] == 0) {
 									cout << "Xaxis scale is logarithmic but series \"" + series
 										+ "\" has xdata[" << i << "] = " <<  xdata[i]  <<
-										" (should be stricly positive)";
+									  " (should be stricly positive)";
 								}
 							}
 						}
@@ -288,7 +285,7 @@ namespace bridges {
 								if (ydata[i] == 0) {
 									cout << "Yaxis scale is logarithmic but series \"" +
 										series + "\" has ydata[" <<  i <<  "] = "  <<  ydata[i] <<
-										" (should be stricly positive)";
+											 " (should be stricly positive)";
 								}
 							}
 						}
@@ -341,7 +338,6 @@ namespace bridges {
 					}
 					yaxis_json = yaxis_json.erase(yaxis_json.length() - 1);
 
-
 					string json_str = JSONencode("plot_title") + COLON +  JSONencode(getTitle()) + COMMA +
 						JSONencode("subtitle") + COLON + JSONencode(getSubTitle())  + COMMA +
 						JSONencode("xLabel") + COLON + JSONencode(getXLabel()) +  COMMA +
@@ -356,7 +352,71 @@ namespace bridges {
 
 					return json_str;
 				}
+				/*
+								virtual void getDataStructureRepresentation(rapidjson::Document& d)
+																		 const override {
+									using namespace rapidjson;
+									check();
+									Document::AllocatorType& allocator = d.GetAllocator();
+									Value xdata_charts(kArrayType);
+									for (auto& entry : xaxisData) {
+										Value key, value, obj;
 
+										obj.SetObject();
+										key.SetString("Plot_Name", allocator);
+										value.SetString(entry.first.c_str(), allocator);
+										obj.AddMember(key, value, allocator);
+
+										Value xaxis_arr(kArrayType);
+										for (auto val : entry.second) {
+											Value v; v.SetDouble(val);
+											xaxis_arr.PushBack(v, allocator);
+										}
+										obj.AddMember("xaxis_data", xaxis_arr, allocator);
+										xdata_charts.PushBack(obj, allocator);
+									}
+									d.AddMember("xaxis_data", xdata_charts, allocator);
+
+									Value yaxis_arr(kArrayType);
+									for (auto& entry : yaxisData) {
+										Value key, value, obj;
+
+										obj.SetObject();
+										key.SetString("Plot_Name", allocator);
+										value.SetString(entry.first.c_str(), allocator);
+										obj.AddMember(key, value, allocator);
+
+										key.SetString("yaxis_data", allocator);
+										Value plot_arr(kArrayType);
+										for (auto val : entry.second) {
+											Value v; v.SetDouble(val);
+											plot_arr.PushBack(v, allocator);
+										}
+										obj.AddMember("yaxis_data", plot_arr, allocator);
+										yaxis_arr.PushBack(obj, allocator);
+									}
+									d.AddMember("yaxis_data", yaxis_arr, allocator);
+									Value v;
+									v.SetString(getTitle().c_str(), allocator);
+									d.AddMember("plot_title", v, allocator);
+									v.SetString(getXLabel().c_str(), allocator);
+									d.AddMember("xLabel", v, allocator);
+									v.SetString(getYLabel().c_str(), allocator);
+									d.AddMember("yLabel", v, allocator);
+									d.AddMember("xaxisType", v.SetBool(logarithmicx), allocator);
+									d.AddMember("yaxisType", v.SetBool(logarithmicy), allocator);
+
+									Value obj;
+									obj.SetObject();
+									obj.AddMember("mouseTracking", v.SetBool(mouseTrack), allocator);
+									obj.AddMember("dataLabels", v.SetBool(dataLabel), allocator);
+									d.AddMember("options", obj, allocator);
+
+									StringBuffer sb;
+									Writer<StringBuffer> writer(sb);
+									d.Accept(writer);
+								};
+				*/
 		};
 	}
 }

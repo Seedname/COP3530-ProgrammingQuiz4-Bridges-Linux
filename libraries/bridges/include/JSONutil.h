@@ -18,7 +18,9 @@ struct rapidjson_exception {
 	}
 };
 
+#ifndef RAPIDJSON_ASSERT
 #define RAPIDJSON_ASSERT(x) if (!( x )) { throw rapidjson_exception( #x, __FILE__, __LINE__ ) ;}
+#endif
 #define RAPIDJSON_ASSERT_THROWS
 
 #include <rapidjson/document.h>
@@ -26,7 +28,6 @@ struct rapidjson_exception {
 #include <rapidjson/writer.h>
 
 namespace bridges {
-
 
 	namespace JSONUtil {
 		///encodes whatever C++ primary type: int, float, double, bool, unsigned long int into its basic proper JSON format.
@@ -48,13 +49,11 @@ namespace bridges {
 			return ss;
 		}
 
-
 		template <>
 		inline std::string JSONencode<std::string> (const std::string& str) {
 
 			rapidjson::Value s;
 			s.SetString(rapidjson::StringRef(str.c_str()));
-
 
 			rapidjson::StringBuffer buffer;
 			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -70,7 +69,6 @@ namespace bridges {
 			rapidjson::Value s;
 			s.SetString(rapidjson::StringRef(str));
 
-
 			rapidjson::StringBuffer buffer;
 			rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
 			s.Accept(writer);
@@ -80,7 +78,6 @@ namespace bridges {
 			std::string ss = output;
 			return ss;
 		}
-
 
 		//precision=-1 means to use max precision.
 		//otherwise number of digits to use
@@ -117,8 +114,6 @@ namespace bridges {
 			std::string ss = output;
 			return ss;
 		}
-
-
 
 	}
 }

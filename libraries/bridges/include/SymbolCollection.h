@@ -40,7 +40,7 @@ namespace bridges {
 				// to maintain their properties
 			private:
 
-		  std::vector<std::shared_ptr<Symbol>> symbols;
+				std::vector<std::shared_ptr<Symbol >> symbols;
 
 				// 	default domain (assuming square coordinate space)
 				// 	domain emanates in x and y directions, both positive
@@ -83,7 +83,7 @@ namespace bridges {
 				  *
 				  *	@return  The date structure type as a string
 				  */
-				virtual const string getDStype() const {
+				virtual const string getDStype() const override {
 					return "SymbolCollectionV2";
 				}
 
@@ -93,25 +93,23 @@ namespace bridges {
 				 *   @param s  symbol being added
 				 */
 
-		  void addSymbolPtr(std::shared_ptr<Symbol> s) {
-		    symbols.push_back(s);
-		  }
+				void addSymbolPtr(std::shared_ptr<Symbol> s) {
+					symbols.push_back(s);
+				}
 
-		  template <typename T>
-		  void addSymbol(T s) {
-		    std::shared_ptr<T> pt = std::make_shared<T>(s);
-		    addSymbolPtr ((std::shared_ptr<Symbol>)pt);
-		  }
+				template <typename T>
+				void addSymbol(T s) {
+					std::shared_ptr<T> pt = std::make_shared<T>(s);
+					addSymbolPtr ((std::shared_ptr<Symbol>)pt);
+				}
 
-
-		  
 			private:
 
 				/*
 				 *	@brief Get the JSON representation of the the data structure
 				 *  @return JSON string of the symbol representation
 				 */
-				virtual const string getDataStructureRepresentation() const {
+				virtual const string getDataStructureRepresentation() const override {
 
 					string symbol_json = string();
 					for (auto& entry : symbols) {

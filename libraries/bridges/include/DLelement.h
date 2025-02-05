@@ -153,7 +153,7 @@ namespace bridges {
 					string nodes_JSON, links_JSON;
 
 					int i = 0; 		// get the JSON string for nodes
-					for (const auto* e : nodes) {
+					for (const auto * e : nodes) {
 						if (node_map.emplace(e, i).second)  {
 							// successful emplacement
 							i++;
@@ -171,13 +171,13 @@ namespace bridges {
 					for (int k = 0; k < nodes.size(); k++) {
 						if (nodes[k]->next != nullptr) { // link exists
 							links_JSON += this->getLinkRepresentation(nodes[k]->links.at(nodes[k]->next),
-									to_string(node_map[nodes[k]]),
-									to_string(node_map[nodes[k]->getNext()]) ) + COMMA;
+								to_string(node_map[nodes[k]]),
+								to_string(node_map[nodes[k]->getNext()]) ) + COMMA;
 						}
 						if (nodes[k]->prev != nullptr) { // link exists
 							links_JSON += this->getLinkRepresentation(nodes[k]->links.at(nodes[k]->prev),
-									to_string(node_map[nodes[k]]),
-									to_string(node_map[nodes[k]->prev]) ) + COMMA;
+								to_string(node_map[nodes[k]]),
+								to_string(node_map[nodes[k]->prev]) ) + COMMA;
 						}
 					}
 
@@ -192,7 +192,6 @@ namespace bridges {
 						QUOTE + "links" + QUOTE + COLON +
 						OPEN_BOX + links_JSON + CLOSE_BOX +
 						CLOSE_CURLY;
-
 
 					return dl_list_json;
 				}
@@ -363,7 +362,6 @@ namespace bridges {
 		using DLelement_List = typename DLelement<E>::DLelement_listhelper;
 		template <class E>
 		using DLelement_ConstList = typename DLelement<E>::DLelement_constlisthelper;
-
 
 	}
 }//end of bridges namespace

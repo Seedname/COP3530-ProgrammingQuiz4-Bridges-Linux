@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <JSONutil.h>
 
-
 using namespace std;
 
 #include "SLelement.h"
@@ -122,7 +121,6 @@ namespace bridges {
 				bool forceLargeViz = false;
 				bool forceSmallViz = false;
 
-
 				GraphAdjList(const GraphAdjList& gr) = delete; //would not be correct
 				const GraphAdjList& operator= (const GraphAdjList& gr) = delete; //would not be correct
 			public:
@@ -134,8 +132,8 @@ namespace bridges {
 					for (auto& v : vertices) {
 						if (adj_list[v.first]) {
 							// discard the edges in the adj. list
-							SLelement<Edge<K, E2>> *tmp;
-							for (SLelement<Edge<K, E2>> *sle =
+							SLelement<Edge<K, E2 >> *tmp;
+							for (SLelement<Edge<K, E2 >> *sle =
 									adj_list[v.first]; sle != nullptr; ) {
 								tmp = sle;
 								sle = sle->getNext();
@@ -155,8 +153,8 @@ namespace bridges {
 				 */
 				virtual const string getDStype() const override {
 					if (forceLargeViz || (!forceSmallViz &&
-							vertices.size() > LargeGraphVertSize &&
-							areAllVerticesLocated())) {
+						vertices.size() > LargeGraphVertSize &&
+						areAllVerticesLocated())) {
 						return "largegraph";
 					}
 					return "GraphAdjacencyList";
@@ -209,13 +207,13 @@ namespace bridges {
 						conv << dest;
 						// add the edge
 						adj_list.at(src) =
-							new SLelement<Edge<K, E2> > (adj_list.at(src),
+								new SLelement<Edge<K, E2> > (adj_list.at(src),
 							Edge<K, E2> (src, dest, &(vertices[src]->links[vertices.at(dest)]), data), conv.str());
 
 					}
 					catch ( const out_of_range& ) {
 						cerr << "addEdge(): Nonexistent vertex?" << endl <<
-							"Create vertices first prior to adding edges that use that vertex" << endl
+								"Create vertices first prior to adding edges that use that vertex" << endl
 							<<  "Cannot add edge between non-existent verticies"
 							<< endl;
 						throw;
@@ -347,7 +345,6 @@ namespace bridges {
 					throw "getEdgeData(): Edge not found";
 				}
 
-
 				/**
 				 * @brief Loads edge specific information for the edge from "src" to  "dest".
 				 *
@@ -363,7 +360,7 @@ namespace bridges {
 						SLelement<Edge<K, E2> > *sle = adj_list.at(src);
 						while (sle) {
 							Edge<K, E2> ed = sle->getValue();
-							if (ed.getVertex() == dest) { //edge exists
+							if (ed.to() == dest) { //edge exists
 								ed.setEdgeData(data); //change edge data
 								sle->setValue(ed); //change slelement data
 								return;
@@ -374,7 +371,7 @@ namespace bridges {
 					}
 					catch ( const out_of_range& ) {
 						cerr << "setEdgeData(): Nonexistent vertices or " <<
-							" edge not found" << endl;
+								" edge not found" << endl;
 						throw;
 					}
 					catch (const char* msg) {
@@ -416,7 +413,6 @@ namespace bridges {
 					}
 				}
 
-
 				/**
 				 *  Return the requested vertex corresponding to a key - non-const version
 				 *	@return the requested vertex of this graph or nullptr if not found
@@ -445,7 +441,7 @@ namespace bridges {
 					// return null
 					try  {
 						// look for the edge
-						SLelement<Edge<K, E2>> *sle = adj_list[src];
+						SLelement<Edge<K, E2 >> *sle = adj_list[src];
 						while (sle != nullptr) {
 							K edge_dest = ((Edge<K, E2>) sle->getValue()).to();
 							if (edge_dest == dest)	// found
@@ -506,7 +502,6 @@ namespace bridges {
 						throw;
 					}
 				}
-
 
 				/**
 				 *  @brief Returns the  visualizer corresponding to  a graph vertex.
@@ -590,7 +585,7 @@ namespace bridges {
 						// get adj. list
 						Element<E1>* src_vert = vertices.at(v.first);
 						// iterate through list and form links
-						for (SLelement<Edge<K, E2>>* it = adj_list.at(v.first); it != nullptr;
+						for (SLelement<Edge<K, E2 >> * it = adj_list.at(v.first); it != nullptr;
 							it = it->getNext()) {
 							Element<E1>* dest_vert = vertices.at(it->getValue().to() );
 							links_JSON +=  src_vert->getLinkRepresentation(
@@ -611,7 +606,6 @@ namespace bridges {
 						QUOTE + "links" + QUOTE + COLON + OPEN_BOX +
 						links_JSON + CLOSE_BOX +
 						CLOSE_CURLY;
-
 
 					return graph_alist_json;
 				}
@@ -668,7 +662,7 @@ namespace bridges {
 						// get adj. list
 						Element<E1>* src_vert = vertices.at(v.first);
 						// iterate through list and form links
-						for (SLelement<Edge<K, E2>>* it = adj_list.at(v.first); it != nullptr;
+						for (SLelement<Edge<K, E2 >> * it = adj_list.at(v.first); it != nullptr;
 							it = it->getNext()) {
 							Element<E1>* dest_vert = vertices.at(it->getValue().to() );
 							LinkVisualizer *lv = src_vert->getLinkVisualizer(dest_vert);
@@ -708,7 +702,6 @@ namespace bridges {
 					}
 					return true;
 				}
-
 
 			public:
 
@@ -822,20 +815,19 @@ namespace bridges {
 				 *	@brief This method is useful for iterating through a set of
 				 *  outgoing edges from a vertex.
 				 */
-				typename SLelement<Edge<K, E2>>::SLelement_listhelper
+				typename SLelement<Edge<K, E2 >>::SLelement_listhelper
 				outgoingEdgeSetOf(K const & k) {
-					return typename SLelement<Edge<K, E2>>::SLelement_listhelper(getAdjacencyList(k));
+					return typename SLelement<Edge<K, E2 >>::SLelement_listhelper(getAdjacencyList(k));
 				}
 
 				/**
 				 *	@brief This method is useful for iterating through a set of
 				 *  outgoing edges from a vertex - const version.
 				 */
-				typename SLelement<Edge<K, E2>>::SLelement_constlisthelper
+				typename SLelement<Edge<K, E2 >>::SLelement_constlisthelper
 				outgoingEdgeSetOf(K const & k) const {
-					return typename SLelement<Edge<K, E2>>::SLelement_constlisthelper(getAdjacencyList(k));
+					return typename SLelement<Edge<K, E2 >>::SLelement_constlisthelper(getAdjacencyList(k));
 				}
-
 
 				/**
 				 *	@brief This is a helper class to return sets of vertices
@@ -862,7 +854,7 @@ namespace bridges {
 									: it(i)
 								{}
 
-								bool operator!=(const iterator& it) const {
+								bool operator!=(const iterator & it) const {
 									return this->it != it.it;
 								}
 
@@ -870,7 +862,7 @@ namespace bridges {
 									return it->second;
 								}
 
-								iterator& operator++() {
+								iterator & operator++() {
 									it ++;
 									return *this;
 								}
@@ -888,7 +880,7 @@ namespace bridges {
 									: it(i)
 								{}
 
-								bool operator!=(const const_iterator& it) const {
+								bool operator!=(const const_iterator & it) const {
 									return this->it != it.it;
 								}
 
@@ -896,12 +888,11 @@ namespace bridges {
 									return it->second;
 								}
 
-								const_iterator& operator++() {
+								const_iterator & operator++() {
 									it ++;
 									return *this;
 								}
 						};
-
 
 						iterator begin() {
 							return iterator(underlying_map.begin());
@@ -929,7 +920,6 @@ namespace bridges {
 					return VertexElementSet_listhelper(vertices);
 				}
 
-
 				/**
 				 * @brief This is a helper class to return sets of vertices
 				 *	in a  way that are iterable with range for loops.
@@ -939,7 +929,7 @@ namespace bridges {
 						typename std::unordered_map<K, Element<E1>* > const & underlying_map;
 
 					public:
-						constVertexElementSet_listhelper (std::unordered_map<K, Element<E1>* > const& um)
+						constVertexElementSet_listhelper (std::unordered_map<K, Element<E1>* > const & um)
 							: underlying_map(um)
 						{}
 
@@ -951,7 +941,7 @@ namespace bridges {
 									: it(i)
 								{}
 
-								bool operator!=(const const_iterator& it) const {
+								bool operator!=(const const_iterator & it) const {
 									return this->it != it.it;
 								}
 
@@ -959,7 +949,7 @@ namespace bridges {
 									return it->second;
 								}
 
-								const_iterator& operator++() {
+								const_iterator & operator++() {
 									it ++;
 									return *this;
 								}

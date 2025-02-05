@@ -60,9 +60,9 @@ namespace bridges {
 				 **/
 				void run(std::string algoName,
 					void (*bfsalgo)(const GraphAdjList<std::string>& gr,
-						std::string root,
-						std::unordered_map<std::string, int>& level,
-						std::unordered_map<std::string, std::string>& parent)) {
+					std::string root,
+					std::unordered_map<std::string, int>& level,
+					std::unordered_map<std::string, std::string>& parent)) {
 					std::vector<double> time;
 					std::vector<double> vtxCounts;
 					std::vector<double> edgeCounts;
@@ -87,7 +87,6 @@ namespace bridges {
 						std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
 
 						std::chrono::duration<double> elapsed_seconds = end - start;
-
 
 						time.push_back ((double)elapsed_seconds.count() );
 						vtxCounts.push_back ( (double)vertexCount );

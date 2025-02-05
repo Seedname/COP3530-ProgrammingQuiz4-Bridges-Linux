@@ -125,7 +125,6 @@ namespace bridges {
 						throw "sampleCount must be less than 1 million";
 					}
 
-
 					if (sampleBits != 8 && sampleBits != 16 && sampleBits != 24 && sampleBits != 32) {
 						throw "sampleBits must be either 8, 16, 24, or 32";
 					}
@@ -137,8 +136,6 @@ namespace bridges {
 					if (sampleRate <= 0) {
 						throw "sampleRate should be positive";
 					}
-
-
 
 					this->sampleCount = sampleCount;
 					this->numChannels = numChannels;
@@ -247,7 +244,6 @@ namespace bridges {
 					return this->sampleCount;
 				}
 
-
 				/**
 				* @brief returns the sampling depth.
 				*
@@ -263,6 +259,13 @@ namespace bridges {
 				**/
 				int getSampleBits() const {
 					return this->sampleBits;
+				}
+
+				void setSampleBits(int bit_depth) {
+					if (bit_depth == 8 || bit_depth == 16 || bit_depth == 24 || bit_depth == 32)
+						this->sampleBits = bit_depth;
+					else
+						cerr << "Bit rate must 8,16,24 or 32!"  << "\n";
 				}
 
 				/**
@@ -430,7 +433,6 @@ namespace bridges {
 						wave_header.riff[3] != 'F')
 						throw "malformed RIFF header";
 
-
 					unsigned char *buffer = new  unsigned char[4];
 					infile.read ((char*) buffer,  4);
 
@@ -449,14 +451,12 @@ namespace bridges {
 						wave_header.wave[3] != 'E')
 						throw "format is not WAVE";
 
-
 					infile.read ((char*) wave_header.fmt_chunk_marker,  4);
 					if (wave_header.fmt_chunk_marker[0] != 'f' ||
 						wave_header.fmt_chunk_marker[1] != 'm' ||
 						wave_header.fmt_chunk_marker[2] != 't' ||
 						wave_header.fmt_chunk_marker[3] != ' ')
 						throw "malformed wave file";
-
 
 					infile.read ((char *) buffer, 4);
 					wave_header.length_of_fmt = buffer[0] | (buffer[1] << 8) |
@@ -491,7 +491,6 @@ namespace bridges {
 
 					if (debug)
 						std::cout << "numChannels: " << numChannels << std::endl;
-
 
 					infile.read ((char *) buffer, 4);
 					wave_header.sample_rate = buffer[0] | (buffer[1] << 8) |
@@ -546,8 +545,6 @@ namespace bridges {
 							data_chunk_found = true;
 					}
 
-
-
 					// calculate no.of samples
 					long num_samples = (8 * wave_header.data_size) /
 						(wave_header.channels * wave_header.bits_per_sample);
@@ -556,12 +553,8 @@ namespace bridges {
 					if (debug)
 						std::cout << "sample Count: " << this->sampleCount << std::endl;
 
-
-
 					long size_of_each_sample = (wave_header.channels *
 							wave_header.bits_per_sample) / 8;
-
-
 
 					delete[] buffer;
 					delete[] buffer2;

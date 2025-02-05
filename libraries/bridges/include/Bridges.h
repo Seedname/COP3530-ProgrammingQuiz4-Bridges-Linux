@@ -8,14 +8,19 @@ using namespace std;
 #include "DataStructure.h" //string, using std
 #include "ServerComm.h" //vector
 
+//#include "DataSource.h"
+
 #include <JSONutil.h>
 #include <alltypes.h>
 #include <chrono>
-
-
+#include <USMap.h>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 namespace bridges {
 	using namespace bridges::datastructure;
+	using namespace rapidjson;
 
 	namespace game {
 		class SocketConnection;
@@ -36,6 +41,9 @@ namespace bridges {
 	 * If the FORCE_BRIDGES_APISERVER environment variable is set,
 	 * use the environment variable as API server in all cases.
 	 *
+	 * If the FORCE_BRIDGES_DATADEBUG environment variable is set,
+	 * output debug information about access data sources.
+	 *
 	 * @author Kalpathi Subramanian, Dakota Carmer, Erik Saule
 	 * @date  7/26/15, 6/5/17, 10/30/18, 7/12/19
 	 */
@@ -45,23 +53,22 @@ namespace bridges {
 				return false;
 			}
 
-
 			static string getDefaultServerURL() {
 				return "http://bridges-cs.herokuapp.com";
 			}
 
-			
 			bool jsonFlag = false;   				// if JSON is to be printed
 
 			// this flag will turn on all labels in the visualization
-			bool element_labelFlag = false, link_labelFlag = false; 
+			bool element_labelFlag = false, link_labelFlag = false;
 
 			bool post_visualization_link = true;	// post flag of visualization url
 
 			string user_name = string(),
 				   api_key = string(); 				// user credentials
 
-			string map[2]; 							// for map overlays
+			string map; 							// for map overlays
+			bool map_as_json = false;
 
 			string description = string();			// visualization description
 
@@ -85,9 +92,11 @@ namespace bridges {
 
 			unsigned int lastAssignNum = 0, subAssignNum = 0;
 
+			// JSON object - contains the data structure representationa
+			rapidjson::Writer<rapidjson::StringBuffer> json_obj;
 
 		public:
-	      
+
 			Bridges() {
 				Bridges (0, "", "");
 			}
@@ -134,22 +143,22 @@ namespace bridges {
 			}
 
 			/**
-			 *  @brief Flag that controls if labels of elements (nodes) are 
+			 *  @brief Flag that controls if labels of elements (nodes) are
 			 *		to be turned on
 			 *
-			 *	@param flag indicating if all labels in the 
-			 *		visualization are turned on 
+			 *	@param flag indicating if all labels in the
+			 *		visualization are turned on
 			 *
 			 */
 			void setElementLabelFlag(bool flag) {
 				element_labelFlag = flag;
 			}
 			/**
-			 *  @brief Flag that controls if labels of links(edges) are 
+			 *  @brief Flag that controls if labels of links(edges) are
 			 *		to be turned on/off
 			 *
-			 *	@param flag indicating if all labels in the 
-			 *		visualization are turned on 
+			 *	@param flag indicating if all labels in the
+			 *		visualization are turned on
 			 *
 			 */
 			void setLinkLabelFlag(bool flag) {
@@ -168,8 +177,8 @@ namespace bridges {
 			/**
 			 *  @brief Return status of flag for link labels
 			 *
-			 *	@return flag boolean indicating if all labels in the 
-			 *		visualization are turned on 
+			 *	@return flag boolean indicating if all labels in the
+			 *		visualization are turned on
 			 *
 			 */
 			bool getLinkLabelFlag() const {
@@ -178,7 +187,7 @@ namespace bridges {
 
 			/**
 			 *
-			 *	@return flag indicating if JSON should be printed 
+			 *	@return flag indicating if JSON should be printed
 			 *		upon visualization
 			 *
 			 */
@@ -350,7 +359,6 @@ namespace bridges {
 				setDataStructure(&ds);
 			}
 
-
 			/**
 			 *
 			 *  @return member holding the data structure handle
@@ -359,7 +367,6 @@ namespace bridges {
 			DataStructure* getDataStructure() {
 				return ds_handle;
 			}
-
 
 			/**
 			 *  Set server type
@@ -373,7 +380,7 @@ namespace bridges {
 			 *
 			 */
 			void setServer(string server_type) {
-			  char* force = getenv("FORCE_BRIDGES_APISERVER");
+				char* force = getenv("FORCE_BRIDGES_APISERVER");
 				if (force != nullptr) {
 					server_type = force;
 				}
@@ -404,15 +411,61 @@ namespace bridges {
 			/**
 			 *  @brief Sets the type of map overlay to use
 			 *
-			 *  @param map     this is an Array describing the map overlay. 
+			 * In general, this isn't the function you want to use. You probably want setMap(const Map*)
+			 *
+			 *  @param map     this is an Array describing the map overlay.
 			 *     	The first element of the array is which map to use: "world" or "us"
-			 *  	and the second element is what attribute from the map to show: a country 
+			 *  	and the second element is what attribute from the map to show: a country
 			 *		from world map, or a state from US map.
 			 *
 			 **/
-			void setMap(string my_map, string info) {
-				map[0] = my_map;
-				map[1] = info;
+			void setMap(string map_str) {
+				map = map_str;
+				setMapAsJSON(false);
+			}
+
+			/*
+			 * @brief this function is used when US maps are drawn as
+			 *  an overlay behind a data structure view or when data
+			 *  attributes are assignment to states or counties
+			 *
+			 *  See tutorial at  https://bridgesuncc.github.io/tutorials/Map.html
+			 *
+			 */
+			void setMap(const Map* map) {
+				string map_str = map->getMapRepresentation();
+				setMapOverlay(map->getOverlay());
+				setCoordSystemType(map->getProjection());
+
+				// get the string rep of the map json
+				this->map = map_str;
+				setMapAsJSON(true);
+			}
+
+			// sets the map object
+			void setMap(const Map& map) {
+				setMap(&map);
+			}
+
+
+			// specifies the map object being send as a JSON or not
+			void setMapAsJSON(bool b) {
+				map_as_json = b;
+			}
+
+			//TODO: What is this get map? This is clearly not how to access map data. What were we trying to do here? [KRS: Probably obsolete?]
+			string getMap(vector<string> states) {
+				string json_str;
+
+				// form the url and get the state county data
+				string url = "http://bridgesdata.herokuapp.com/api/us_map?state=";
+				url += states[0];
+				//				to do muultiple states -- later
+				//				for (auto st : states)
+				//					url += st + ",";
+				//				url = url.substr(0, url.size()-1);
+
+				return json_str;
 			}
 
 			/**
@@ -480,10 +533,10 @@ namespace bridges {
 				wc_window.push_back(ymax);
 			}
 
-	  string getVisualizeURL() const {
-	    return BASE_URL + to_string(getAssignment()) + "/" + getUserName();
-	  }
-	  
+			string getVisualizeURL() const {
+				return BASE_URL + to_string(getAssignment()) + "/" + getUserName();
+			}
+
 			/**
 			 *
 			 * 	Sends relevant meta-data and representation of the data structure to the BRIDGES server,
@@ -501,7 +554,6 @@ namespace bridges {
 				if (profile())
 					start = std::chrono::system_clock::now();
 
-
 				if (getAssignment() != lastAssignNum) { 		// reset if a new assignment
 					lastAssignNum = getAssignment();
 					subAssignNum = 0;
@@ -518,20 +570,65 @@ namespace bridges {
 
 				//
 				// get the JSON of the data structure
-				// each data structure is responsible for generating its JSON
+				// each data structure is responsible for generating its own JSON
 				//
 				if (profile())
 					jsonbuild_start = std::chrono::system_clock::now();
 
-				// THIS IS BAD - NEEDS FIXING!!!
 				string ds_json;
+				// We are transitioning to using rapidjson to
+				// generate the JSON of the data structure reprsentation
+				Document doc;
+				StringBuffer sb;
+				Writer<StringBuffer> json_writer(sb); 	// for conversion to string
+				doc.SetObject();
 				if (ds_handle->getDStype() == "Scene") {
-					string ds_part_json = ds_handle->getDataStructureRepresentation(); 
+					string ds_part_json = ds_handle->getDataStructureRepresentation();
 					// erase open curly brace
 					ds_part_json.erase(0, 1);
 					ds_json = getJSONHeader() + ds_part_json;
 				}
-				else ds_json = getJSONHeader() + ds_handle->getDataStructureRepresentation();
+				else if (ds_handle->getDStype() == "us_map") {
+					setMap((USMap*) ds_handle);
+					//					string tmp = ds_handle->getDataStructureRepresentation();
+					// Document d;
+					// d.SetObject();
+					// Value key, value;
+					// key.SetString("mapdummy");
+					// value.SetBool(true);
+					// d.AddMember(key, value, d.GetAllocator());
+					//					ds_json = getJSONHeader(d);
+					ds_json = getJSONHeader() + ds_handle->getDataStructureRepresentation();
+					//					ds_json = getJSONHeader();
+				}
+				/*
+								else if (ds_handle->getDStype() == "LineChart"){
+
+									// get the header information
+									string s = getJSONHeader(doc);
+
+									// get the data structure representation
+									ds_handle->getDataStructureRepresentation(doc);
+									doc.Accept(json_writer);
+									ds_json = sb.GetString();
+								}
+				*/
+				/*
+								else if (ds_handle->getDStype() == "SinglyLinkedList"){
+									ds_json = getJSONHeader() + ds_handle->getDataStructureRepresentation();
+								//	getJSONHeader(doc);
+
+								//	doc.Accept(json_writer);
+									ds_handle->getDataStructureRepresentation(doc);
+									doc.Accept(json_writer);
+									ds_json = sb.GetString();
+				cout << "DS Rep(in visualize():\n" << sb.GetString() << endl;;
+
+								}
+				*/
+				else {
+					ds_json = getJSONHeader() + ds_handle->getDataStructureRepresentation();
+				}
 				if (profile())
 					jsonbuild_end = std::chrono::system_clock::now();
 
@@ -541,7 +638,6 @@ namespace bridges {
 				if (getJSONFlag()) {
 					cout << "JSON[" + ds_handle->getDStype() + "]:\t" << ds_json << endl;
 				}
-
 
 				if (profile())
 					httprequest_start = std::chrono::system_clock::now();
@@ -554,7 +650,7 @@ namespace bridges {
 					if (post_visualization_link) {
 						cout << "Success: Assignment posted to the server. " << endl
 							<< "Check out your visualization at:" << endl << endl
-						     << getVisualizeURL() << endl << endl;
+							<< getVisualizeURL() << endl << endl;
 					}
 					subAssignNum++;
 				}
@@ -562,31 +658,29 @@ namespace bridges {
 					cerr << "\nPosting assignment to the server failed!" << endl
 						<< error_str << endl << endl;
 					cerr << "Provided Bridges Credentials:" << endl <<
-						"\t User Name: " << getUserName() << endl <<
-						"\t API Key: " << getApiKey() << endl <<
-						"\t Assignment Number: " << getAssignment() << endl;
+							"\t User Name: " << getUserName() << endl <<
+							"\t API Key: " << getApiKey() << endl <<
+							"\t Assignment Number: " << getAssignment() << endl;
 				}
 				catch (const HTTPException& he) {
-				  cerr << "\nPosting assignment to the server failed!" << endl;
-				  if (he.httpcode == 401) {
-				    cerr << "Provided Bridges Credentials are incorrect:" << endl <<
-				      "\t ServerURL: "<< getServerURL() <<endl<<
-				      "\t User Name: " << getUserName() << endl <<
-				      "\t API Key: " << getApiKey() << endl <<
-				      "\t Assignment Number: " << getAssignment() << endl;
-				  }
-				  else if (he.httpcode == 413) {
-				    cerr<<"Assignment is too large."<<endl;
-				    cerr<<"In general the assignment should be smaller than 16MB once serialized to JSON."<<endl;
-				  }
-				  else {
-				    std::cerr<<he.what()<<endl;
-				  }
+					cerr << "\nPosting assignment to the server failed!" << endl;
+					if (he.httpcode == 401) {
+						cerr << "Provided Bridges Credentials are incorrect:" << endl <<
+								"\t ServerURL: " << getServerURL() << endl <<
+								"\t User Name: " << getUserName() << endl <<
+								"\t API Key: " << getApiKey() << endl <<
+								"\t Assignment Number: " << getAssignment() << endl;
+					}
+					else if (he.httpcode == 413) {
+						cerr << "Assignment is too large." << endl;
+						cerr << "In general the assignment should be smaller than 16MB once serialized to JSON." << endl;
+					}
+					else {
+						std::cerr << he.what() << endl;
+					}
 				}
 				if (profile())
 					httprequest_end = std::chrono::system_clock::now();
-
-
 
 				if (profile()) {
 					end = std::chrono::system_clock::now();
@@ -606,6 +700,59 @@ namespace bridges {
 				return server_url;
 			}
 
+			string  getJSONHeader(Document& d) {
+				Value key, value;
+
+				key.SetString("visual", d.GetAllocator());
+				value.SetString(ds_handle->getDStype().c_str(), d.GetAllocator());
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("title", d.GetAllocator());
+				value.SetString(getTitle().c_str(), d.GetAllocator());
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("description", d.GetAllocator());
+				value.SetString(getDescription().c_str(), d.GetAllocator());
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("map", d.GetAllocator());
+				value.SetString(map.c_str(), d.GetAllocator());
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("map_overlay", d.GetAllocator());
+				value.SetBool((map_overlay) ? true : false);
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("element_label_flag", d.GetAllocator());
+				value.SetBool(element_labelFlag);
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("link_label_flag", d.GetAllocator());
+				value.SetBool(link_labelFlag);
+				d.AddMember(key, value, d.GetAllocator());
+
+				key.SetString("coord_system_type", d.GetAllocator());
+				value.SetString(getCoordSystemType().c_str(), d.GetAllocator());
+				d.AddMember(key, value, d.GetAllocator());
+
+				if (wc_window.size() == 4) {// world coord window has been specified
+					Value v;
+					d.SetArray();
+					Value w_array(kArrayType);
+					w_array.PushBack(v.SetDouble(wc_window[0]), d.GetAllocator());
+					w_array.PushBack(v.SetDouble(wc_window[1]), d.GetAllocator());
+					w_array.PushBack(v.SetDouble(wc_window[2]), d.GetAllocator());
+					w_array.PushBack(v.SetDouble(wc_window[3]), d.GetAllocator());
+
+					d.AddMember("window", w_array, d.GetAllocator());
+				}
+				// conver JSON to a string
+				StringBuffer s;
+				Writer<StringBuffer> writer(s);
+				d.Accept(writer);
+
+				return s.GetString();
+			}
 
 			string getJSONHeader () {
 				using bridges::JSONUtil::JSONencode;
@@ -614,10 +761,14 @@ namespace bridges {
 					QUOTE + "visual" + QUOTE + COLON + JSONencode(ds_handle->getDStype()) + COMMA +
 					QUOTE + "title" + QUOTE + COLON + JSONencode(getTitle()) + COMMA +
 					QUOTE + "description" + QUOTE + COLON + JSONencode( getDescription()) + COMMA +
-					QUOTE + "map_overlay" + QUOTE + COLON + ((map_overlay) ? "true" : "false") + COMMA +
-					QUOTE + "map" + QUOTE + COLON + OPEN_BOX + QUOTE + map[0] + QUOTE + 
-								COMMA + QUOTE + map[1] + QUOTE + CLOSE_BOX + COMMA +
-					QUOTE + "element_label_flag" + QUOTE + COLON + ((element_labelFlag) ? "true" : "false") + COMMA +
+					QUOTE + "map_overlay" + QUOTE + COLON +
+					((map_overlay) ? "true" : "false") + COMMA;
+				if (map_as_json)
+					json_header += QUOTE + "map" + QUOTE + COLON + map + COMMA;
+				else
+					json_header += QUOTE + "map" + QUOTE + COLON + QUOTE + map + QUOTE + COMMA;
+
+				json_header += QUOTE + "element_label_flag" + QUOTE + COLON + ((element_labelFlag) ? "true" : "false") + COMMA +
 					QUOTE + "link_label_flag" + QUOTE + COLON + ((link_labelFlag) ? "true" : "false") + COMMA +
 					QUOTE + "coord_system_type" + QUOTE + COLON + JSONencode(getCoordSystemType()) +
 					COMMA;

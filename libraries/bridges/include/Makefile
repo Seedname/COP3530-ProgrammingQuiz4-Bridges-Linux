@@ -1,12 +1,11 @@
-STYLE_PARAMS = -A2 -T4 -xn -xc -xV -C -S -N -xU  -Y -p -xg -H -y -xb
+SOCKETIOFLAGS=-D BOOST_DATE_TIME_NO_LIB -D BOOST_REGEX_NO_LIB -D ASIO_STANDALONE -D _WEBSOCKETPP_CPP11_STL_ -D _WEBSOCKETPP_CPP11_FUNCTIONAL_
+SOCKETIOINCLUDES=-I ../lib/asio/asio/include -I ../lib/websocketpp -I ../../rapidjson/include
+
+CXXFLAGS=$(SOCKETIOINCLUDES) $(SOCKETIOFLAGS) -std=c++14
 
 
-all: base datasrc
+all: libsioclient.a
 
-base:
-	astyle $(STYLE_PARAMS) *.h
-datasrc:
-	astyle $(STYLE_PARAMS) data_src/*.h
+libsioclient.a: sio_client.o sio_socket.o internal/sio_client_impl.o internal/sio_packet.o
+	ar qc libsioclient.a sio_client.o sio_socket.o internal/sio_client_impl.o internal/sio_packet.o
 
-clean:
-	rm -f *.orig

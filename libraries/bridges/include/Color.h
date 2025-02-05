@@ -13,7 +13,6 @@
 #include "DataStructure.h" //string, using std
 #include <JSONutil.h>
 
-
 namespace bridges {
 	namespace datastructure {
 		/**
@@ -51,9 +50,9 @@ namespace bridges {
 		class Color {
 			private:
 				// The named colors' rgba channel value mappings
-				static const unordered_map<string, const array<int, 4>>&
+				static const unordered_map<string, const array<int, 4 >> &
 				ColorNames() {
-					static unordered_map<string, const array<int, 4>> cn {
+					static unordered_map<string, const array<int, 4 >> cn {
 
 						{	{"aliceblue", {{240, 248, 255, 255}}},
 							{"antiquewhite", {{250, 235, 215, 255}}},
@@ -375,7 +374,7 @@ namespace bridges {
 						for (size_t i = 0; i < name.size() / chanChars; i++) {
 							//converts and save hex val to rgba val
 							channels.at(i) = (int) strtol(name.substr(i * chanChars,
-										chanChars).c_str(), nullptr, 16) * chanMultiplier;
+								chanChars).c_str(), nullptr, 16) * chanMultiplier;
 						}
 					}
 					else { //invalid color
@@ -414,6 +413,32 @@ namespace bridges {
 						JSONencode( ((float) (this->getAlpha()) / 255.0f));
 
 					return OPEN_BOX + strCSS + CLOSE_BOX;
+				}
+				const void getCSSRepresentation(rapidjson::Document& d) const {
+
+
+					using namespace rapidjson;
+					double r = 0, g = 0, b = 0, alpha = 0;
+					Value v;
+					d.SetObject();
+					Document::AllocatorType& allocator = d.GetAllocator();
+					Value col_arr(kArrayType);
+					if (this->isTransparent()) {
+						//leaves off other channels if transparent
+						//	d.AddMember("color", v.SetString("[0, 0, 0, 0]"),
+						//								allocator);
+						col_arr.PushBack(0., allocator);
+						col_arr.PushBack(0., allocator);
+						col_arr.PushBack(0., allocator);
+						col_arr.PushBack(0., allocator);
+					}
+					else {
+						col_arr.PushBack(v.SetDouble(this->getRed()), allocator);
+						col_arr.PushBack(v.SetDouble(this->getGreen()), allocator);
+						col_arr.PushBack(v.SetDouble(this->getBlue()), allocator);
+						col_arr.PushBack(v.SetDouble(this->getAlpha()), allocator);
+					}
+					d.AddMember("color", col_arr, allocator);
 				}
 
 			private:

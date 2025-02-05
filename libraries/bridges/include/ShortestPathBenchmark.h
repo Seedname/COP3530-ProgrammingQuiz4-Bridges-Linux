@@ -81,9 +81,9 @@ namespace bridges {
 				 **/
 				void run(std::string algoName,
 					void (*spalgo)(const GraphAdjList<int, OSMVertex, double>& gr,
-						int source,
-						std::unordered_map<int, double>& distance,
-						std::unordered_map<int, int>& parent)) {
+					int source,
+					std::unordered_map<int, double>& distance,
+					std::unordered_map<int, int>& parent)) {
 					std::vector<double> time;
 					std::vector<double> vtxCounts;
 					std::vector<double> edgeCounts;
@@ -93,7 +93,6 @@ namespace bridges {
 
 					double reflat = 40.74; //New York City, NC
 					double reflong = -73.98;
-
 
 					for (double radius = 0.02; radius < 0.15; radius += 0.02) {
 						std::cerr << "*" << std::flush;
@@ -107,7 +106,6 @@ namespace bridges {
 						long vertexCount = countVertices(graph);
 						long edgeCount = countEdges(graph);
 
-
 						int root = getCenter(osm_data, graph, reflat, reflong);
 
 						std::unordered_map<int, double> level;
@@ -120,7 +118,6 @@ namespace bridges {
 						std::chrono::time_point<std::chrono::system_clock> end = std::chrono::system_clock::now();
 
 						std::chrono::duration<double> elapsed_seconds = end - start;
-
 
 						time.push_back ((double)elapsed_seconds.count() );
 						vtxCounts.push_back ( (double)vertexCount );
